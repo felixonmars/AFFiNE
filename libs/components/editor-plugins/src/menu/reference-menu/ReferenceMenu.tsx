@@ -1,8 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
-import { MuiClickAwayListener, styled } from '@toeverything/components/ui';
+import {
+    MuiClickAwayListener,
+    styled,
+    MuiPopper as Popper,
+    MuiGrow as Grow,
+    MuiPaper as Paper,
+} from '@toeverything/components/ui';
 import { Virgo, HookType, PluginHooks } from '@toeverything/framework/virgo';
-import { Point } from '@toeverything/utils';
 
 import { ReferenceMenuContainer } from './Container';
 import { QueryBlocks, QueryResult } from '../../search';
@@ -18,26 +29,36 @@ export type RefLinkComponent = {
     reference: string;
 };
 
-const BEFORE_REGEX = /\[\[(.*)$/;
+type ReferenceMenuStyle = {
+    left: number;
+    top: number;
+    height: number;
+};
 
 export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
-    const [is_show, set_is_show] = useState(false);
-    const [block_id, set_block_id] = useState<string>();
-    const [position, set_position] = useState<Point>(new Point(0, 0));
-
-    const [search_text, set_search_text] = useState<string>('');
-    const [search_blocks, set_search_blocks] = useState<QueryResult>([]);
+    const [isShow, setIsShow] = useState(false);
+    const [blockId, setBlockId] = useState<string>();
+    const [searchText, setSearchText] = useState<string>('');
+    const [searchBlocks, setSearchBlocks] = useState<QueryResult>([]);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const ref = useRef();
+    const [referenceMenuStyle, setReferenceMenuStyle] =
+        useState<ReferenceMenuStyle>({
+            left: 0,
+            top: 0,
+            height: 0,
+        });
 
     useEffect(() => {
-        QueryBlocks(editor, search_text, result => set_search_blocks(result));
-    }, [editor, search_text]);
+        QueryBlocks(editor, searchText, result => setSearchBlocks(result));
+    }, [editor, searchText]);
 
-    const search_block_ids = useMemo(
-        () => Object.values(search_blocks).map(({ id }) => id),
-        [search_blocks]
+    const searchBlockIds = useMemo(
+        () => Object.values(searchBlocks).map(({ id }) => id),
+        [searchBlocks]
     );
 
-    const handle_search = useCallback(
+    const handleSearch = useCallback(
         async (event: React.KeyboardEvent<HTMLDivElement>) => {
             const { type, anchorNode } = editor.selection.currentSelectInfo;
             if (
@@ -48,38 +69,52 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
                 const text = editor.blockHelper.getBlockTextBeforeSelection(
                     anchorNode.id
                 );
-                const matched = BEFORE_REGEX.exec(text)?.[1];
 
-                if (typeof matched === 'string') {
-                    if (event.key === '[') set_is_show(true);
+                if (isShow) {
+                    setSearchText('G');
+                }
 
-                    set_block_id(anchorNode.id);
-                    set_search_text(matched);
+                if (text.endsWith('[[')) {
+                    if (event.key === 'Backspace') {
+                        setIsShow(false);
+                        return;
+                    }
+                    setIsShow(true);
 
+                    setBlockId(anchorNode.id);
+                    setSearchText(' ');
+
+                    editor.scrollManager.lock();
                     const rect =
                         editor.selection.currentSelectInfo?.browserSelection
                             ?.getRangeAt(0)
                             ?.getBoundingClientRect();
                     if (rect) {
-                        set_position(new Point(rect.left, rect.top + 24));
+                        const rectTop = rect.top;
+                        const { top, left } =
+                            editor.container.getBoundingClientRect();
+                        setReferenceMenuStyle({
+                            top: rectTop - top,
+                            left: rect.left - left,
+                            height: rect.height,
+                        });
+                        setAnchorEl(ref.current);
                     }
-                } else if (is_show) {
-                    set_is_show(false);
                 }
             }
         },
-        [editor, is_show]
+        [editor, isShow]
     );
 
-    const handle_keyup = useCallback(
-        (event: React.KeyboardEvent<HTMLDivElement>) => handle_search(event),
-        [handle_search]
+    const handleKeyup = useCallback(
+        (event: React.KeyboardEvent<HTMLDivElement>) => handleSearch(event),
+        [handleSearch]
     );
 
-    const handle_key_down = useCallback(
+    const handleKeyDown = useCallback(
         (event: React.KeyboardEvent<HTMLDivElement>) => {
             if (event.code === 'Escape') {
-                set_is_show(false);
+                setIsShow(false);
             }
         },
         []
@@ -88,61 +123,82 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
     useEffect(() => {
         const sub = hooks
             .get(HookType.ON_ROOT_NODE_KEYUP)
-            .subscribe(handle_keyup);
+            .subscribe(handleKeyup);
         sub.add(
             hooks
                 .get(HookType.ON_ROOT_NODE_KEYDOWN_CAPTURE)
-                .subscribe(handle_key_down)
+                .subscribe(handleKeyDown)
         );
 
         return () => {
             sub.unsubscribe();
         };
-    }, [handle_keyup, handle_key_down, hooks]);
+    }, [handleKeyup, handleKeyDown, hooks]);
 
-    const handle_selected = async (reference: string) => {
-        if (block_id) {
+    const handleSelected = async (reference: string) => {
+        if (blockId) {
             const { anchorNode } = editor.selection.currentSelectInfo;
             editor.blockHelper.insertReference(
                 reference,
                 anchorNode.id,
                 editor.selection.currentSelectInfo?.browserSelection,
-                -search_text.length - 2
+                -searchText.length - 2
             );
         }
 
-        set_is_show(false);
+        setIsShow(false);
     };
 
-    const handle_close = () => {
-        block_id && editor.blockHelper.removeSearchSlash(block_id);
+    const handleClose = () => {
+        blockId && editor.blockHelper.removeSearchSlash(blockId);
     };
 
     return (
-        <ReferenceMenuWrapper
-            style={{ top: position.y, left: position.x }}
-            onKeyUp={handle_keyup}
+        <div
+            ref={ref}
+            style={{
+                position: 'absolute',
+                width: '10px',
+                ...referenceMenuStyle,
+            }}
         >
-            <MuiClickAwayListener onClickAway={() => set_is_show(false)}>
-                <div>
-                    <ReferenceMenuContainer
-                        editor={editor}
-                        hooks={hooks}
-                        style={style}
-                        isShow={is_show && !!search_text}
-                        blockId={block_id}
-                        onSelected={handle_selected}
-                        onClose={handle_close}
-                        searchBlocks={search_blocks}
-                        types={search_block_ids}
-                    />
-                </div>
+            <MuiClickAwayListener onClickAway={() => setIsShow(false)}>
+                <Popper
+                    open={isShow}
+                    anchorEl={anchorEl}
+                    transition
+                    placement="bottom-start"
+                >
+                    {({ TransitionProps }) => (
+                        <Grow
+                            {...TransitionProps}
+                            style={{
+                                transformOrigin: 'left bottom',
+                            }}
+                        >
+                            <Paper>
+                                <ReferenceMenuWrapper onKeyUp={handleKeyup}>
+                                    <ReferenceMenuContainer
+                                        editor={editor}
+                                        hooks={hooks}
+                                        style={style}
+                                        isShow={true}
+                                        blockId={blockId}
+                                        onSelected={handleSelected}
+                                        onClose={handleClose}
+                                        searchBlocks={searchBlocks}
+                                        types={searchBlockIds}
+                                    />
+                                </ReferenceMenuWrapper>
+                            </Paper>
+                        </Grow>
+                    )}
+                </Popper>
             </MuiClickAwayListener>
-        </ReferenceMenuWrapper>
+        </div>
     );
 };
 
 const ReferenceMenuWrapper = styled('div')({
-    position: 'absolute',
     zIndex: 1,
 });
