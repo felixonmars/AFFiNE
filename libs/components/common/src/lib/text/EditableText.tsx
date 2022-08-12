@@ -49,6 +49,7 @@ import { CustomElement } from '..';
 import isUrl from 'is-url';
 import { InlineRefLink } from './plugins/reflink';
 import { TextWithComments } from './element-leaf/TextWithComments';
+import { PageLinkComponent } from './plugins/PageLink';
 
 export interface TextProps {
     /** read only */
@@ -739,6 +740,16 @@ const EditorElement = (props: any) => {
 
     switch (element.type) {
         case 'link': {
+            if (element.linkType === 'pageLink') {
+                return (
+                    <PageLinkComponent
+                        {...props}
+                        editor={editor}
+                        onLinkModalVisibleChange={onLinkModalVisibleChange}
+                        hideInlineMenu={hideInlineMenu}
+                    />
+                );
+            }
             return (
                 <LinkComponent
                     {...props}

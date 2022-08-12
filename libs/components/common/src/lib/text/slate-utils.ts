@@ -15,6 +15,7 @@ import { ReactEditor } from 'slate-react';
 import {
     getCommentsIdsOnTextNode,
     getEditorMarkForCommentId,
+    getRandomString,
     MARKDOWN_STYLE_MAP,
     MatchRes,
 } from './utils';
@@ -1028,29 +1029,91 @@ class SlateUtils {
         });
     }
 
-    public insertReference(reference: string) {
-        try {
-            // Transforms.setSelection(this.editor, this.getEndSelection());
-            const { anchor, focus } = this.getEndSelection();
-            Transforms.insertNodes(
-                this.editor,
-                {
-                    type: 'reflink',
-                    reference,
-                    children: [],
-                },
-                { at: focus || anchor }
-            );
+    public setDoubleLinkSearchSlash(point: Point) {
+        const str = Editor.string(this.editor, {
+            anchor: this.getStart(),
+            focus: point,
+        });
+        if (str.endsWith('[[')) {
+            Transforms.select(this.editor, {
+                anchor: point,
+                focus: Object.assign({}, point, {
+                    offset: point.offset - 2,
+                }),
+            });
+            Editor.addMark(this.editor, 'doubleLinkSearch', true);
+            Transforms.select(this.editor, {
+                anchor: this.editor.selection.anchor,
+                focus: this.editor.selection.anchor,
+            });
+        }
+    }
 
-            // requestAnimationFrame(() => {
-            //     console.log(this.editor.selection, this.editor.insertNode);
-            //     this.editor.insertNode({
-            //         type: 'reflink',
-            //         reference,
-            //         children: [{ text: '' }]
-            //     });
-            //     // Transforms.select();
-            // });
+    public getDoubleLinkSearchSlashText() {
+        const nodes = Editor.nodes(this.editor, {
+            at: [],
+            //@ts-ignore
+            match: node => !!node.doubleLinkSearch,
+        });
+        const searchNode = nodes.next().value;
+        if (searchNode && (searchNode[0] as { text?: string }).text) {
+            return (searchNode[0] as { text?: string }).text;
+        }
+        return '';
+    }
+
+    public removeDoubleLinkSearchSlash(isRemoveSlash?: boolean) {
+        if (isRemoveSlash) {
+            const nodes = Editor.nodes(this.editor, {
+                at: [],
+                //@ts-ignore
+                match: node => !!node.doubleLinkSearch,
+            });
+            const searchNode = nodes.next().value;
+            if (searchNode) {
+                const text = (searchNode[0] as { text?: string })?.text || '';
+                if (text.startsWith('[[')) {
+                    const path = searchNode[1];
+                    Transforms.delete(this.editor, {
+                        at: {
+                            path,
+                            offset: 0,
+                        },
+                        distance: 1,
+                        unit: 'character',
+                    });
+                }
+            }
+        }
+        Transforms.setNodes(
+            this.editor,
+            { doubleLinkSearch: null } as Partial<SlateNode>,
+            {
+                at: [],
+                match: node => {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    //@ts-ignore
+                    return !!node.doubleLinkSearch;
+                },
+            }
+        );
+        this.editor.removeMark('doubleLinkSearch');
+    }
+
+    public insertReference(workspace: string, reference: string, slatSel: any) {
+        try {
+            Transforms.select(this.editor, slatSel);
+            const link = {
+                type: 'link',
+                linkType: 'pageLink',
+                url: `/${workspace}/${reference}`,
+                children: [{ text: reference }],
+                id: getRandomString('link'),
+            };
+            Transforms.insertNodes(this.editor, link);
+            requestAnimationFrame(() => {
+                ReactEditor.focus(this.editor);
+            });
         } catch (e) {
             console.log(e);
         }

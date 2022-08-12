@@ -13,6 +13,9 @@ type TextUtilsFunctions =
     | 'setSearchSlash'
     | 'removeSearchSlash'
     | 'getSearchSlashText'
+    | 'setDoubleLinkSearchSlash'
+    | 'getDoubleLinkSearchSlashText'
+    | 'removeDoubleLinkSearchSlash'
     | 'selectionToSlateRange'
     | 'transformPoint'
     | 'toggleTextFormatBySelection'
@@ -140,27 +143,47 @@ export class BlockHelper {
         }
     }
 
+    public setDoubleLinkSearchSlash(blockId: string, point: Point) {
+        const textUtils = this._blockTextUtilsMap[blockId];
+        if (textUtils) {
+            textUtils.setDoubleLinkSearchSlash(point);
+        } else {
+            console.warn('Could find the block text utils');
+        }
+    }
+
+    public getDoubleLinkSearchSlashText(blockId: string) {
+        const textUtils = this._blockTextUtilsMap[blockId];
+        if (textUtils) {
+            return textUtils.getDoubleLinkSearchSlashText();
+        }
+        console.warn('Could find the block text utils');
+        return '';
+    }
+
+    public removeDoubleLinkSearchSlash(
+        blockId: string,
+        isRemoveSlash?: boolean
+    ) {
+        const textUtils = this._blockTextUtilsMap[blockId];
+        if (textUtils) {
+            textUtils.removeDoubleLinkSearchSlash(isRemoveSlash);
+        } else {
+            console.warn('Could find the block text utils');
+        }
+    }
+
     public insertReference(
+        workspace: string,
         reference: string,
         blockId: string,
         selection: Selection,
         offset: number
     ) {
-        const text_utils = this._blockTextUtilsMap[blockId];
-        if (text_utils) {
-            const offsetSelection = window.getSelection();
-            offsetSelection.setBaseAndExtent(
-                selection.anchorNode,
-                selection.anchorOffset,
-                selection.focusNode,
-                selection.focusOffset + offset
-            );
-
-            text_utils.removeSelection(offsetSelection);
-            text_utils.insertReference(reference);
-
-            // range.
-            // text_utils.toggleTextFormatBySelection(format, range);
+        const textUtils = this._blockTextUtilsMap[blockId];
+        if (textUtils) {
+            const slatSel = this.selectionToSlateRange(blockId, selection);
+            textUtils.insertReference(workspace, reference, slatSel);
         }
         console.warn('Could find the block text utils');
     }
