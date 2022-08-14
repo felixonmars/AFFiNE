@@ -11,7 +11,7 @@ import { styled } from '@toeverything/components/ui';
 
 import { QueryResult } from '../../search';
 
-export type ReferenceMenuContainerProps = {
+export type DoubleLinkMenuContainerProps = {
     editor: Virgo;
     hooks: PluginHooks;
     style?: React.CSSProperties;
@@ -23,7 +23,7 @@ export type ReferenceMenuContainerProps = {
     types?: Array<string>;
 };
 
-export const ReferenceMenuContainer = ({
+export const DoubleLinkMenuContainer = ({
     hooks,
     isShow = false,
     onSelected,
@@ -31,7 +31,7 @@ export const ReferenceMenuContainer = ({
     types,
     searchBlocks,
     style,
-}: ReferenceMenuContainerProps) => {
+}: DoubleLinkMenuContainerProps) => {
     const menuRef = useRef<HTMLDivElement>(null);
     const [currentItem, setCurrentItem] = useState<string | undefined>();
     const [needCheckIntoView, setNeedCheckIntoView] = useState<boolean>(false);

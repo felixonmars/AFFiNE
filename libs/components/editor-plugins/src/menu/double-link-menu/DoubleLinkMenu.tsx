@@ -15,27 +15,26 @@ import {
 } from '@toeverything/components/ui';
 import { Virgo, HookType, PluginHooks } from '@toeverything/framework/virgo';
 
-import { ReferenceMenuContainer } from './Container';
+import { DoubleLinkMenuContainer } from './Container';
 import { QueryBlocks, QueryResult } from '../../search';
 
-export type ReferenceMenuProps = {
+export type DoubleLinkMenuProps = {
     editor: Virgo;
     hooks: PluginHooks;
     style?: { left: number; top: number };
 };
 
-export type RefLinkComponent = {
-    type: 'reflink';
-    reference: string;
-};
-
-type ReferenceMenuStyle = {
+type DoubleMenuStyle = {
     left: number;
     top: number;
     height: number;
 };
 
-export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
+export const DoubleLinkMenu = ({
+    editor,
+    hooks,
+    style,
+}: DoubleLinkMenuProps) => {
     const [isShow, setIsShow] = useState(false);
     const [blockId, setBlockId] = useState<string>();
     const [searchText, setSearchText] = useState<string>('');
@@ -43,7 +42,7 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const ref = useRef();
     const [referenceMenuStyle, setReferenceMenuStyle] =
-        useState<ReferenceMenuStyle>({
+        useState<DoubleMenuStyle>({
             left: 0,
             top: 0,
             height: 0,
@@ -58,11 +57,11 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
         [searchBlocks]
     );
 
-    const hideMenu = () => {
+    const hideMenu = useCallback(() => {
         setIsShow(false);
         editor.blockHelper.removeSearchSlash(blockId);
         editor.scrollManager.unLock();
-    };
+    }, [blockId, editor.blockHelper, editor.scrollManager]);
 
     const handleSearch = useCallback(
         async (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -132,7 +131,7 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
                 }
             }
         },
-        [editor, isShow]
+        [editor, isShow, blockId, hideMenu]
     );
 
     const handleKeyup = useCallback(
@@ -146,7 +145,7 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
                 hideMenu();
             }
         },
-        []
+        [hideMenu]
     );
 
     useEffect(() => {
@@ -207,8 +206,8 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
                             }}
                         >
                             <Paper>
-                                <ReferenceMenuWrapper onKeyUp={handleKeyup}>
-                                    <ReferenceMenuContainer
+                                <DoubleLinkMenuWrapper onKeyUp={handleKeyup}>
+                                    <DoubleLinkMenuContainer
                                         editor={editor}
                                         hooks={hooks}
                                         style={style}
@@ -219,7 +218,7 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
                                         searchBlocks={searchBlocks}
                                         types={searchBlockIds}
                                     />
-                                </ReferenceMenuWrapper>
+                                </DoubleLinkMenuWrapper>
                             </Paper>
                         </Grow>
                     )}
@@ -229,6 +228,6 @@ export const ReferenceMenu = ({ editor, hooks, style }: ReferenceMenuProps) => {
     );
 };
 
-const ReferenceMenuWrapper = styled('div')({
+const DoubleLinkMenuWrapper = styled('div')({
     zIndex: 1,
 });
