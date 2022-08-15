@@ -9,6 +9,7 @@ import {
     Location,
     Path,
     Node as SlateNode,
+    BaseSelection,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
 
@@ -1100,14 +1101,20 @@ class SlateUtils {
         this.editor.removeMark('doubleLinkSearch');
     }
 
-    public insertReference(workspace: string, reference: string, slatSel: any) {
+    public insertDoubleLink(
+        workspaceId: string,
+        linkBlockId: string,
+        slatSel: Location,
+        children: any[]
+    ) {
         try {
             Transforms.select(this.editor, slatSel);
             const link = {
                 type: 'link',
                 linkType: 'pageLink',
-                url: `/${workspace}/${reference}`,
-                children: [{ text: reference }],
+                workspaceId: workspaceId,
+                blockId: linkBlockId,
+                children: children,
                 id: getRandomString('link'),
             };
             Transforms.insertNodes(this.editor, link);

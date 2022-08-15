@@ -29,7 +29,7 @@ type TextUtilsFunctions =
     | 'getCommentsIdsBySelection'
     | 'getCurrentSelection'
     | 'removeSelection'
-    | 'insertReference'
+    | 'insertDoubleLink'
     | 'isCollapsed'
     | 'blur';
 
@@ -173,17 +173,25 @@ export class BlockHelper {
         }
     }
 
-    public insertReference(
-        workspace: string,
-        reference: string,
+    public async insertDoubleLink(
+        workspaceId: string,
+        linkBlockId: string,
         blockId: string,
-        selection: Selection,
-        offset: number
+        selection: Selection
     ) {
         const textUtils = this._blockTextUtilsMap[blockId];
         if (textUtils) {
+            const linkBlock = await this._editor.getBlock({
+                workspace: workspaceId,
+                id: linkBlockId,
+            });
             const slatSel = this.selectionToSlateRange(blockId, selection);
-            textUtils.insertReference(workspace, reference, slatSel);
+            textUtils.insertDoubleLink(
+                workspaceId,
+                linkBlockId,
+                slatSel,
+                linkBlock.getProperties().text.value
+            );
         }
         console.warn('Could find the block text utils');
     }

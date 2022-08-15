@@ -126,8 +126,6 @@ export const DoubleLinkMenu = ({
                     editor.blockHelper.getDoubleLinkSearchSlashText(blockId);
                 if (searchText && searchText.startsWith('[[')) {
                     setSearchText(searchText.slice(2));
-                } else {
-                    hideMenu();
                 }
             }
         },
@@ -163,15 +161,14 @@ export const DoubleLinkMenu = ({
         };
     }, [handleKeyup, handleKeyDown, hooks]);
 
-    const handleSelected = async (reference: string) => {
+    const handleSelected = async (linkBlockId: string) => {
         if (blockId) {
             const { anchorNode } = editor.selection.currentSelectInfo;
-            editor.blockHelper.insertReference(
+            editor.blockHelper.insertDoubleLink(
                 editor.workspace,
-                reference,
+                linkBlockId,
                 anchorNode.id,
-                editor.selection.currentSelectInfo?.browserSelection,
-                -searchText.length - 2
+                editor.selection.currentSelectInfo?.browserSelection
             );
         }
 

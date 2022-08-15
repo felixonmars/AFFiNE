@@ -258,7 +258,7 @@ export class Editor implements Virgo {
         return await blockView.onCreate(block);
     }
 
-    private async getBlock({
+    public async getBlock({
         workspace,
         id,
     }: WorkspaceAndBlockId): Promise<AsyncBlock | null> {
