@@ -50,6 +50,7 @@ import isUrl from 'is-url';
 import { InlineRefLink } from './plugins/reflink';
 import { TextWithComments } from './element-leaf/TextWithComments';
 import { DoubleLinkComponent } from './plugins/DoubleLink';
+import { SearchIcon } from '@toeverything/components/icons';
 
 export interface TextProps {
     /** read only */
@@ -741,14 +742,7 @@ const EditorElement = (props: any) => {
     switch (element.type) {
         case 'link': {
             if (element.linkType === 'pageLink') {
-                return (
-                    <DoubleLinkComponent
-                        {...props}
-                        editor={editor}
-                        onLinkModalVisibleChange={onLinkModalVisibleChange}
-                        hideInlineMenu={hideInlineMenu}
-                    />
-                );
+                return <DoubleLinkComponent {...props} editor={editor} />;
             }
             return (
                 <LinkComponent
@@ -835,6 +829,15 @@ const EditorLeaf = ({ attributes, children, leaf }: any) => {
             ...attributes.style,
             borderBottom: '1px solid rgba(204, 204, 204, 0.9)',
         };
+    }
+
+    if (leaf.doubleLinkSearch) {
+        customChildren = (
+            <span style={{ backgroundColor: '#eee' }}>
+                <SearchIcon />
+                {customChildren}
+            </span>
+        );
     }
 
     if (leaf.strikethrough) {

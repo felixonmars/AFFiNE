@@ -59,7 +59,7 @@ export const DoubleLinkMenu = ({
 
     const hideMenu = useCallback(() => {
         setIsShow(false);
-        editor.blockHelper.removeSearchSlash(blockId);
+        editor.blockHelper.removeDoubleLinkSearchSlash(blockId);
         editor.scrollManager.unLock();
     }, [blockId, editor.blockHelper, editor.scrollManager]);
 
@@ -176,7 +176,7 @@ export const DoubleLinkMenu = ({
     };
 
     const handleClose = () => {
-        blockId && editor.blockHelper.removeSearchSlash(blockId);
+        blockId && editor.blockHelper.removeDoubleLinkSearchSlash(blockId);
     };
 
     return (
