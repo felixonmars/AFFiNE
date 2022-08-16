@@ -741,7 +741,7 @@ const EditorElement = (props: any) => {
 
     switch (element.type) {
         case 'link': {
-            if (element.linkType === 'pageLink') {
+            if (element.linkType === 'doubleLink') {
                 return <DoubleLinkComponent {...props} editor={editor} />;
             }
             return (

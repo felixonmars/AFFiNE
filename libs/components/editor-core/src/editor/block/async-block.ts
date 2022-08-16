@@ -496,7 +496,7 @@ export class AsyncBlock {
         const values = rawData.properties?.text?.value || [];
         for (let i = 0; i < values.length; i++) {
             const item = values[i] as any;
-            if (item.linkType === 'pageLink') {
+            if (item.linkType === 'doubleLink') {
                 const linkBlock = await this.services.load({
                     workspace: item.workspaceId,
                     id: item.blockId,

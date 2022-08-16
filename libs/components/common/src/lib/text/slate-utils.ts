@@ -1142,7 +1142,7 @@ class SlateUtils {
     ) {
         const link = {
             type: 'link',
-            linkType: 'pageLink',
+            linkType: 'doubleLink',
             workspaceId: workspaceId,
             blockId: linkBlockId,
             children: children,
