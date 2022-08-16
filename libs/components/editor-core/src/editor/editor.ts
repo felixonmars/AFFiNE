@@ -1,41 +1,39 @@
 /* eslint-disable max-lines */
-import HotKeys from 'hotkeys-js';
-import LRUCache from 'lru-cache';
-
-import { services } from '@toeverything/datasource/db-service';
+import type { PatchNode } from '@toeverything/components/ui';
+import { Commands } from '@toeverything/datasource/commands';
 import type {
     BlockFlavors,
     ReturnEditorBlock,
     UpdateEditorBlock,
 } from '@toeverything/datasource/db-service';
-import type { PatchNode } from '@toeverything/components/ui';
-
-import { AsyncBlock } from './block';
-import type { WorkspaceAndBlockId } from './block';
-import type { BaseView } from './views/base-view';
-import { SelectionManager } from './selection';
-import { Hooks, PluginManager } from './plugin';
-import { EditorCommands } from './commands';
-import {
-    Virgo,
-    HooksRunner,
-    PluginHooks,
-    PluginCreator,
-    StorageManager,
-    VirgoSelection,
-    PluginManagerInterface,
-} from './types';
-import { KeyboardManager } from './keyboard';
-import { MouseManager } from './mouse';
-import { ScrollManager } from './scroll';
-import assert from 'assert';
+import { services } from '@toeverything/datasource/db-service';
 import { domToRect, last, Point, sleep } from '@toeverything/utils';
-import { Commands } from '@toeverything/datasource/commands';
+import assert from 'assert';
+import HotKeys from 'hotkeys-js';
+import LRUCache from 'lru-cache';
+import type { WorkspaceAndBlockId } from './block';
+import { AsyncBlock } from './block';
+import { BlockHelper } from './block/block-helper';
 import { BrowserClipboard } from './clipboard/browser-clipboard';
 import { ClipboardPopulator } from './clipboard/clipboard-populator';
-import { BlockHelper } from './block/block-helper';
-import { DragDropManager } from './drag-drop';
+import { EditorCommands } from './commands';
 import { EditorConfig } from './config';
+import { DragDropManager } from './drag-drop';
+import { KeyboardManager } from './keyboard';
+import { MouseManager } from './mouse';
+import { Hooks, PluginManager } from './plugin';
+import { ScrollManager } from './scroll';
+import { SelectionManager } from './selection';
+import {
+    HooksRunner,
+    PluginCreator,
+    PluginHooks,
+    PluginManagerInterface,
+    StorageManager,
+    Virgo,
+    VirgoSelection,
+} from './types';
+import type { BaseView } from './views/base-view';
 
 export interface EditorCtorProps {
     workspace: string;
@@ -132,10 +130,15 @@ export class Editor implements Virgo {
                 const node = meta.get('node') as string;
                 const selection = meta.get('selection') as any;
                 await this.selectionManager.activeNodeByNodeId(node);
-                await this.selectionManager.setNodeActiveSelection(
-                    node,
-                    selection
-                );
+
+                if (selection.info) {
+                    await this.selectionManager.setNodeActiveSelection(
+                        node,
+                        selection
+                    );
+                } else {
+                    // TODO: redo find the selection
+                }
             }
         );
     }
