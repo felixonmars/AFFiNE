@@ -164,15 +164,14 @@ export const DoubleLinkMenu = ({
     const handleSelected = async (linkBlockId: string) => {
         if (blockId) {
             const { anchorNode } = editor.selection.currentSelectInfo;
-            editor.blockHelper.insertDoubleLink(
+            editor.blockHelper.setSelectDoubleLinkSearchSlash(blockId);
+            await editor.blockHelper.insertDoubleLink(
                 editor.workspace,
                 linkBlockId,
-                anchorNode.id,
-                editor.selection.currentSelectInfo?.browserSelection
+                anchorNode.id
             );
+            hideMenu();
         }
-
-        hideMenu();
     };
 
     const handleClose = () => {

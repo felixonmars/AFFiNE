@@ -15,6 +15,7 @@ type TextUtilsFunctions =
     | 'getSearchSlashText'
     | 'setDoubleLinkSearchSlash'
     | 'getDoubleLinkSearchSlashText'
+    | 'setSelectDoubleLinkSearchSlash'
     | 'removeDoubleLinkSearchSlash'
     | 'selectionToSlateRange'
     | 'transformPoint'
@@ -160,6 +161,14 @@ export class BlockHelper {
         console.warn('Could find the block text utils');
         return '';
     }
+    public setSelectDoubleLinkSearchSlash(blockId: string) {
+        const textUtils = this._blockTextUtilsMap[blockId];
+        if (textUtils) {
+            return textUtils.setSelectDoubleLinkSearchSlash();
+        }
+        console.warn('Could find the block text utils');
+        return '';
+    }
 
     public removeDoubleLinkSearchSlash(
         blockId: string,
@@ -176,8 +185,7 @@ export class BlockHelper {
     public async insertDoubleLink(
         workspaceId: string,
         linkBlockId: string,
-        blockId: string,
-        selection: Selection
+        blockId: string
     ) {
         const textUtils = this._blockTextUtilsMap[blockId];
         if (textUtils) {
@@ -185,11 +193,9 @@ export class BlockHelper {
                 workspace: workspaceId,
                 id: linkBlockId,
             });
-            const slatSel = this.selectionToSlateRange(blockId, selection);
             textUtils.insertDoubleLink(
                 workspaceId,
                 linkBlockId,
-                slatSel,
                 linkBlock.getProperties().text.value
             );
         }

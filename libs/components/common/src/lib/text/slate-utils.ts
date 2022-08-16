@@ -1063,6 +1063,40 @@ class SlateUtils {
         return '';
     }
 
+    public setSelectDoubleLinkSearchSlash() {
+        const nodes = Editor.nodes(this.editor, {
+            at: [],
+            //@ts-ignore
+            match: node => !!node.doubleLinkSearch,
+        });
+        const searchNode = nodes.next().value;
+        if (searchNode) {
+            const text = (searchNode[0] as { text?: string })?.text || '';
+            const path = searchNode[1];
+            const anchor = Editor.before(
+                this.editor,
+                {
+                    path,
+                    offset: 1,
+                },
+                {
+                    unit: 'offset',
+                }
+            );
+            const focus = Editor.after(
+                this.editor,
+                {
+                    path,
+                    offset: text.length - 1,
+                },
+                {
+                    unit: 'offset',
+                }
+            );
+            Transforms.select(this.editor, { anchor, focus });
+        }
+    }
+
     public removeDoubleLinkSearchSlash(isRemoveSlash?: boolean) {
         if (isRemoveSlash) {
             const nodes = Editor.nodes(this.editor, {
@@ -1080,7 +1114,7 @@ class SlateUtils {
                             path,
                             offset: 0,
                         },
-                        distance: 1,
+                        distance: text.length,
                         unit: 'character',
                     });
                 }
@@ -1104,26 +1138,20 @@ class SlateUtils {
     public insertDoubleLink(
         workspaceId: string,
         linkBlockId: string,
-        slatSel: Location,
         children: any[]
     ) {
-        try {
-            Transforms.select(this.editor, slatSel);
-            const link = {
-                type: 'link',
-                linkType: 'pageLink',
-                workspaceId: workspaceId,
-                blockId: linkBlockId,
-                children: children,
-                id: getRandomString('link'),
-            };
-            Transforms.insertNodes(this.editor, link);
-            requestAnimationFrame(() => {
-                ReactEditor.focus(this.editor);
-            });
-        } catch (e) {
-            console.log(e);
-        }
+        const link = {
+            type: 'link',
+            linkType: 'pageLink',
+            workspaceId: workspaceId,
+            blockId: linkBlockId,
+            children: children,
+            id: getRandomString('link'),
+        };
+        Transforms.insertNodes(this.editor, link);
+        requestAnimationFrame(() => {
+            ReactEditor.focus(this.editor);
+        });
     }
 
     /** todo  improve if selection is collapsed  */
