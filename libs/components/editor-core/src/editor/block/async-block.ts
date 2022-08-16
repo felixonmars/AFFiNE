@@ -154,6 +154,7 @@ export class AsyncBlock {
         }
         this.initialized = true;
         this.raw_data = await this.filterPageInvalidChildren(this.raw_data);
+        this.raw_data = await this.updateDoubleLinkBlock(this.raw_data);
         const { workspace, id } = this.raw_data;
         this.unobserve = await this.services.observe(
             { workspace, id },
@@ -488,6 +489,28 @@ export class AsyncBlock {
         // The load node method will filter invalid children automatically
         const children = await this.load_nodes(this.raw_data.children);
         rawData.children = children.map(child => child.id);
+        return rawData;
+    }
+
+    async updateDoubleLinkBlock(rawData: ReturnEditorBlock) {
+        const values = rawData.properties?.text?.value || [];
+        for (let i = 0; i < values.length; i++) {
+            const item = values[i] as any;
+            if (item.linkType === 'pageLink') {
+                const linkBlock = await this.services.load({
+                    workspace: item.workspaceId,
+                    id: item.blockId,
+                });
+
+                if (linkBlock) {
+                    const newItem = {
+                        ...item,
+                        children: linkBlock.getProperties().text.value,
+                    };
+                    values.splice(i, 1, newItem);
+                }
+            }
+        }
         return rawData;
     }
 
