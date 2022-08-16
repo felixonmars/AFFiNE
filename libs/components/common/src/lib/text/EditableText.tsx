@@ -834,7 +834,7 @@ const EditorLeaf = ({ attributes, children, leaf }: any) => {
     if (leaf.doubleLinkSearch) {
         customChildren = (
             <span style={{ backgroundColor: '#eee' }}>
-                <SearchIcon />
+                <SearchIcon style={{ width: '16px', height: '16px' }} />
                 {customChildren}
             </span>
         );

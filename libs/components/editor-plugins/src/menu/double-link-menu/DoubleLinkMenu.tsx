@@ -75,11 +75,17 @@ export const DoubleLinkMenu = ({
                     anchorNode.id
                 );
 
-                if (isShow) {
-                    setSearchText('G');
-                }
-
                 if (text.endsWith('[[')) {
+                    if (
+                        [
+                            'ArrowRight',
+                            'ArrowLeft',
+                            'ArrowUp',
+                            'ArrowDown',
+                        ].includes(event.key)
+                    ) {
+                        return;
+                    }
                     if (event.key === 'Backspace') {
                         hideMenu();
                         return;
