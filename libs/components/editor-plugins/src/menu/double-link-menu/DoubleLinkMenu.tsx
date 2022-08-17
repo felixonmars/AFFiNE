@@ -52,7 +52,9 @@ export const DoubleLinkMenu = ({
         });
 
     useEffect(() => {
-        QueryBlocks(editor, searchText, result => setSearchBlocks(result));
+        QueryBlocks(editor, searchText, result => {
+            setSearchBlocks(result);
+        });
     }, [editor, searchText]);
 
     const searchBlockIds = useMemo(
@@ -110,7 +112,7 @@ export const DoubleLinkMenu = ({
                             );
                         }
                     });
-                    setSearchText(' ');
+                    setSearchText('');
                     setIsShow(true);
                     editor.scrollManager.lock();
                     const rect =
