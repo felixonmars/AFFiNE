@@ -205,6 +205,7 @@ export const DoubleLinkMenu = ({
             workspace: editor.workspace,
             type: 'page' as const,
         });
+        setIsNewPage(false);
         await services.api.pageTree.addChildPageToWorkspace(
             editor.workspace,
             getPageId(),

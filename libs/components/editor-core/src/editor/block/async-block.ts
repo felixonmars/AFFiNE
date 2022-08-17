@@ -508,11 +508,16 @@ export class AsyncBlock {
                     if (children.length === 1 && !children[0].text) {
                         children = [{ text: 'Untitled' }];
                     }
-                    const newItem = {
-                        ...item,
-                        children: children,
-                    };
-                    values.splice(i, 1, newItem);
+                    if (
+                        children.map(v => v.text).join('') !==
+                        (item.children || []).map((v: any) => v.text).join('')
+                    ) {
+                        const newItem = {
+                            ...item,
+                            children: children,
+                        };
+                        values.splice(i, 1, newItem);
+                    }
                 }
             }
         }
