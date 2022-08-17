@@ -136,7 +136,7 @@ export const DoubleLinkMenu = ({
                 const searchText =
                     editor.blockHelper.getDoubleLinkSearchSlashText(blockId);
                 if (searchText && searchText.startsWith('[[')) {
-                    setSearchText(searchText.slice(2));
+                    setSearchText(searchText.slice(2).trim());
                 }
             }
         },

@@ -248,7 +248,11 @@ Editor.insertText = function (
         const { path, offset } = at;
         if (text.length > 0) {
             const marks = Editor.marks(editor);
-            if (text === '\u0020' && Object.keys(marks).length) {
+            if (
+                text === '\u0020' &&
+                Object.keys(marks).length &&
+                !(marks as any).doubleLinkSearch
+            ) {
                 // If the input is a space and the mark has content, remove the mark
                 const newPath = [path[0], path[1] + 1];
                 const newPoint = {
