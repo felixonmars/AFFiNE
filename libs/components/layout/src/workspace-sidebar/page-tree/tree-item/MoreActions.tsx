@@ -185,7 +185,9 @@ function DndTreeItemMoreActions(props: ActionsProps) {
         },
         {
             title: '',
-            isDivide: true,
+            renderCustom: props => {
+                return <Divider></Divider>;
+            },
         },
         // {
         //     title: 'New Child Page',
@@ -211,7 +213,9 @@ function DndTreeItemMoreActions(props: ActionsProps) {
         },
         {
             title: '',
-            isDivide: true,
+            renderCustom: props => {
+                return <Divider></Divider>;
+            },
         },
         {
             title: 'Open In New Tab',
@@ -227,7 +231,9 @@ function DndTreeItemMoreActions(props: ActionsProps) {
         },
         {
             title: '',
-            isDivide: true,
+            renderCustom: props => {
+                return <Divider></Divider>;
+            },
         },
         {
             title: 'Copy Link',

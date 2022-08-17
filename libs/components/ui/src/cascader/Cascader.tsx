@@ -15,11 +15,11 @@ export interface CascaderItemProps {
     subItems?: CascaderItemProps[];
     children?: ReactElement | Array<never>;
     icon?: ReactElement;
-    isDivide?: boolean;
 }
 
 interface ItemProps extends CascaderItemProps {
     onClose?: () => void;
+    renderCustom?: (props: ItemProps) => JSX.Element;
 }
 
 interface CascaderProps {
@@ -33,13 +33,13 @@ interface CascaderProps {
 }
 
 function CascaderItem(props: ItemProps) {
-    const { title, subItems, callback, onClose, children, icon, isDivide } =
+    const { title, subItems, callback, onClose, children, icon, renderCustom } =
         props;
     const item_ref = useRef(null);
     const [open, setOpen] = useState(false);
 
-    if (isDivide) {
-        return <Divider></Divider>;
+    if (renderCustom) {
+        return renderCustom(props);
     }
 
     const on_click_item = () => {
@@ -118,7 +118,7 @@ export function Cascader(props: CascaderProps) {
                                         onClose={onClose}
                                         children={item.children}
                                         icon={item.icon}
-                                        isDivide={item.isDivide}
+                                        renderCustom={item.renderCustom}
                                     />
                                 );
                             })}
