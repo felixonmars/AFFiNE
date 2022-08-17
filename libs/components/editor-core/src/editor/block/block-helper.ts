@@ -193,11 +193,11 @@ export class BlockHelper {
                 workspace: workspaceId,
                 id: linkBlockId,
             });
-            textUtils.insertDoubleLink(
-                workspaceId,
-                linkBlockId,
-                linkBlock.getProperties().text.value
-            );
+            let children = linkBlock.getProperties().text?.value || [];
+            if (children.length === 1 && !children[0].text) {
+                children = [{ text: 'Untitled' }];
+            }
+            textUtils.insertDoubleLink(workspaceId, linkBlockId, children);
         }
         console.warn('Could find the block text utils');
     }

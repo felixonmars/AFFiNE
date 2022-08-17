@@ -14,6 +14,7 @@ import {
 } from '@toeverything/utils';
 import { BlockProvider } from './block-provider';
 import { BaseView, BaseView as BlockView } from './../views/base-view';
+import { LegendToggle } from '@mui/icons-material';
 
 type EventType = 'update';
 export interface EventData {
@@ -503,9 +504,13 @@ export class AsyncBlock {
                 });
 
                 if (linkBlock) {
+                    let children = linkBlock.getProperties().text?.value || [];
+                    if (children.length === 1 && !children[0].text) {
+                        children = [{ text: 'Untitled' }];
+                    }
                     const newItem = {
                         ...item,
-                        children: linkBlock.getProperties().text.value,
+                        children: children,
                     };
                     values.splice(i, 1, newItem);
                 }

@@ -17,6 +17,8 @@ import { Virgo, HookType, PluginHooks } from '@toeverything/framework/virgo';
 
 import { DoubleLinkMenuContainer } from './Container';
 import { QueryBlocks, QueryResult } from '../../search';
+import { services } from '@toeverything/datasource/db-service';
+import { getPageId } from '@toeverything/utils';
 
 export type DoubleLinkMenuProps = {
     editor: Virgo;
@@ -169,12 +171,11 @@ export const DoubleLinkMenu = ({
 
     const handleSelected = async (linkBlockId: string) => {
         if (blockId) {
-            const { anchorNode } = editor.selection.currentSelectInfo;
             editor.blockHelper.setSelectDoubleLinkSearchSlash(blockId);
             await editor.blockHelper.insertDoubleLink(
                 editor.workspace,
                 linkBlockId,
-                anchorNode.id
+                blockId
             );
             hideMenu();
         }
@@ -182,6 +183,19 @@ export const DoubleLinkMenu = ({
 
     const handleClose = () => {
         blockId && editor.blockHelper.removeDoubleLinkSearchSlash(blockId);
+    };
+
+    const handleAddSubPage = async () => {
+        const new_page = await services.api.editorBlock.create({
+            workspace: editor.workspace,
+            type: 'page' as const,
+        });
+        await services.api.pageTree.addChildPageToWorkspace(
+            editor.workspace,
+            getPageId(),
+            new_page.id
+        );
+        handleSelected(new_page.id);
     };
 
     return (
@@ -209,6 +223,7 @@ export const DoubleLinkMenu = ({
                         >
                             <Paper>
                                 <DoubleLinkMenuWrapper onKeyUp={handleKeyup}>
+                                    <div>Link To Page</div>
                                     <DoubleLinkMenuContainer
                                         editor={editor}
                                         hooks={hooks}
@@ -221,6 +236,9 @@ export const DoubleLinkMenu = ({
                                         types={searchBlockIds}
                                     />
                                 </DoubleLinkMenuWrapper>
+                                <div onClick={handleAddSubPage}>
+                                    Add new sub-page
+                                </div>
                             </Paper>
                         </Grow>
                     )}
