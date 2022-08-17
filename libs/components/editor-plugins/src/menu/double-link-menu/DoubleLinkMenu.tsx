@@ -41,6 +41,7 @@ export const DoubleLinkMenu = ({
     const [blockId, setBlockId] = useState<string>();
     const [searchText, setSearchText] = useState<string>('');
     const [searchBlocks, setSearchBlocks] = useState<QueryResult>([]);
+    const [isNewPage, setIsNewPage] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const ref = useRef();
     const [referenceMenuStyle, setReferenceMenuStyle] =
@@ -171,6 +172,18 @@ export const DoubleLinkMenu = ({
 
     const handleSelected = async (linkBlockId: string) => {
         if (blockId) {
+            if (isNewPage) {
+                const newPage = await services.api.editorBlock.create({
+                    workspace: editor.workspace,
+                    type: 'page' as const,
+                });
+                await services.api.pageTree.addChildPageToWorkspace(
+                    editor.workspace,
+                    linkBlockId,
+                    newPage.id
+                );
+                linkBlockId = newPage.id;
+            }
             editor.blockHelper.setSelectDoubleLinkSearchSlash(blockId);
             await editor.blockHelper.insertDoubleLink(
                 editor.workspace,
@@ -186,16 +199,20 @@ export const DoubleLinkMenu = ({
     };
 
     const handleAddSubPage = async () => {
-        const new_page = await services.api.editorBlock.create({
+        const newPage = await services.api.editorBlock.create({
             workspace: editor.workspace,
             type: 'page' as const,
         });
         await services.api.pageTree.addChildPageToWorkspace(
             editor.workspace,
             getPageId(),
-            new_page.id
+            newPage.id
         );
-        handleSelected(new_page.id);
+        handleSelected(newPage.id);
+    };
+
+    const handleAddNewPage = async () => {
+        setIsNewPage(true);
     };
 
     return (
@@ -223,7 +240,11 @@ export const DoubleLinkMenu = ({
                         >
                             <Paper>
                                 <DoubleLinkMenuWrapper onKeyUp={handleKeyup}>
-                                    <div>Link To Page</div>
+                                    <div>
+                                        {isNewPage
+                                            ? 'Suggested'
+                                            : 'Link To Page'}
+                                    </div>
                                     <DoubleLinkMenuContainer
                                         editor={editor}
                                         hooks={hooks}
@@ -238,6 +259,9 @@ export const DoubleLinkMenu = ({
                                 </DoubleLinkMenuWrapper>
                                 <div onClick={handleAddSubPage}>
                                     Add new sub-page
+                                </div>
+                                <div onClick={handleAddNewPage}>
+                                    Add new page in...
                                 </div>
                             </Paper>
                         </Grow>
