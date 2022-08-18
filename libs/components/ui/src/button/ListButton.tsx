@@ -36,7 +36,7 @@ const styles = style9.create({
 
 type ListButtonProps = {
     className?: string;
-    onClick: () => void;
+    onClick?: () => void;
     onMouseOver?: () => void;
     content?: string;
     children?: () => JSX.Element;

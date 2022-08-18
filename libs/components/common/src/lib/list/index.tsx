@@ -28,6 +28,7 @@ export type CommonListItem = {
     divider?: string;
     content?: Content;
     block?: BlockSearchItem;
+    renderCustom?: (props: CommonListItem) => JSX.Element;
 };
 
 type MenuItemsProps = {
@@ -58,7 +59,9 @@ export const CommonList = (props: MenuItemsProps) => {
             >
                 {usedItems?.length ? (
                     usedItems.map((item, idx) => {
-                        if (item.block) {
+                        if (item.renderCustom) {
+                            return item.renderCustom(item);
+                        } else if (item.block) {
                             return (
                                 <BlockPreview
                                     className={clsx(

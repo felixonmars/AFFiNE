@@ -10,7 +10,6 @@ import { domToRect } from '@toeverything/utils';
 import { styled } from '@toeverything/components/ui';
 
 import { QueryResult } from '../../search';
-import { PagesIcon } from '@toeverything/components/icons';
 
 export type DoubleLinkMenuContainerProps = {
     editor: Virgo;
@@ -20,7 +19,6 @@ export type DoubleLinkMenuContainerProps = {
     blockId: string;
     onSelected?: (item: string) => void;
     onClose?: () => void;
-    searchBlocks?: QueryResult;
     types?: Array<string>;
     items?: CommonListItem[];
 };
@@ -31,7 +29,6 @@ export const DoubleLinkMenuContainer = ({
     onSelected,
     onClose,
     types,
-    searchBlocks,
     style,
     items,
 }: DoubleLinkMenuContainerProps) => {

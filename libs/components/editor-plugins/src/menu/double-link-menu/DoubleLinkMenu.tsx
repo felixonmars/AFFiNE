@@ -12,6 +12,7 @@ import {
     MuiPopper as Popper,
     MuiGrow as Grow,
     MuiPaper as Paper,
+    ListButton,
 } from '@toeverything/components/ui';
 import { Virgo, HookType, PluginHooks } from '@toeverything/framework/virgo';
 
@@ -62,12 +63,19 @@ export const DoubleLinkMenu = ({
             setSearchBlocks(result);
             const items: CommonListItem[] = [];
             if (searchBlocks?.length > 0) {
-                items.push({
-                    content: {
-                        id: 'linktopage',
-                        content: 'LINK TO PAGE',
-                    },
-                });
+                if (isNewPage) {
+                    items.push({
+                        renderCustom: () => {
+                            return <ListButton content={'SUGGESTED'} />;
+                        },
+                    });
+                } else {
+                    items.push({
+                        renderCustom: () => {
+                            return <ListButton content={'LINK TO PAGE'} />;
+                        },
+                    });
+                }
                 items.push(
                     ...(searchBlocks?.map(
                         block => ({ block } as CommonListItem)
@@ -95,7 +103,7 @@ export const DoubleLinkMenu = ({
 
             setItems(items);
         });
-    }, [editor, searchText]);
+    }, [editor, searchText, isNewPage]);
 
     const types = useMemo(() => {
         return Object.values(searchBlocks)
@@ -105,6 +113,7 @@ export const DoubleLinkMenu = ({
 
     const hideMenu = useCallback(() => {
         setIsShow(false);
+        setIsNewPage(false);
         editor.blockHelper.removeDoubleLinkSearchSlash(blockId);
         editor.scrollManager.unLock();
     }, [blockId, editor.blockHelper, editor.scrollManager]);
@@ -255,6 +264,13 @@ export const DoubleLinkMenu = ({
             type: 'page' as const,
         });
         setIsNewPage(false);
+        services.api.editorBlock.update({
+            id: newPage.id,
+            workspace: editor.workspace,
+            properties: {
+                text: { value: [{ text: searchText }] },
+            },
+        });
         await services.api.pageTree.addChildPageToWorkspace(
             editor.workspace,
             getPageId(),
@@ -292,11 +308,6 @@ export const DoubleLinkMenu = ({
                         >
                             <Paper>
                                 <DoubleLinkMenuWrapper onKeyUp={handleKeyup}>
-                                    <div>
-                                        {isNewPage
-                                            ? 'Suggested'
-                                            : 'Link To Page'}
-                                    </div>
                                     <DoubleLinkMenuContainer
                                         editor={editor}
                                         hooks={hooks}
