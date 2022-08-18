@@ -12,6 +12,7 @@ import {
     MuiPopper as Popper,
     MuiGrow as Grow,
     MuiPaper as Paper,
+    MuiOutlinedInput as OutlinedInput,
     ListButton,
 } from '@toeverything/components/ui';
 import { Virgo, HookType, PluginHooks } from '@toeverything/framework/virgo';
@@ -51,6 +52,7 @@ export const DoubleLinkMenu = ({
     const [isNewPage, setIsNewPage] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const ref = useRef();
+    const ref1 = useRef<HTMLInputElement>();
     const [referenceMenuStyle, setReferenceMenuStyle] =
         useState<DoubleMenuStyle>({
             left: 0,
@@ -61,6 +63,7 @@ export const DoubleLinkMenu = ({
     useEffect(() => {
         QueryBlocks(editor, searchText, result => {
             setSearchBlocks(result);
+            ref1?.current?.focus();
             const items: CommonListItem[] = [];
             if (searchBlocks?.length > 0) {
                 if (isNewPage) {
@@ -279,10 +282,6 @@ export const DoubleLinkMenu = ({
         handleSelected(newPage.id);
     };
 
-    const handleAddNewPage = async () => {
-        setIsNewPage(true);
-    };
-
     return (
         <div
             ref={ref}
@@ -307,7 +306,13 @@ export const DoubleLinkMenu = ({
                             }}
                         >
                             <Paper>
-                                <DoubleLinkMenuWrapper onKeyUp={handleKeyup}>
+                                <DoubleLinkMenuWrapper>
+                                    <SearchContainer ref={ref1}>
+                                        <OutlinedInput
+                                            placeholder="Filter actions..."
+                                            onChange={() => {}}
+                                        />
+                                    </SearchContainer>
                                     <DoubleLinkMenuContainer
                                         editor={editor}
                                         hooks={hooks}
@@ -331,4 +336,13 @@ export const DoubleLinkMenu = ({
 
 const DoubleLinkMenuWrapper = styled('div')({
     zIndex: 1,
+});
+
+const SearchContainer = styled('div')({
+    padding: '8px 8px',
+    input: {
+        height: '28px',
+        padding: '5px 10px',
+        with: '300px',
+    },
 });
