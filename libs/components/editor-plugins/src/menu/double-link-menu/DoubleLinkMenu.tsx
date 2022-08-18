@@ -19,6 +19,11 @@ import { DoubleLinkMenuContainer } from './Container';
 import { QueryBlocks, QueryResult } from '../../search';
 import { services } from '@toeverything/datasource/db-service';
 import { getPageId } from '@toeverything/utils';
+import { CommonListItem } from '@toeverything/components/common';
+import { AddIcon } from '@toeverything/components/icons';
+
+const ADD_NEW_SUB_PAGE = 'AddNewSubPage';
+const ADD_NEW_PAGE = 'AddNewPage';
 
 export type DoubleLinkMenuProps = {
     editor: Virgo;
@@ -41,6 +46,7 @@ export const DoubleLinkMenu = ({
     const [blockId, setBlockId] = useState<string>();
     const [searchText, setSearchText] = useState<string>('');
     const [searchBlocks, setSearchBlocks] = useState<QueryResult>([]);
+    const [items, setItems] = useState<CommonListItem[]>([]);
     const [isNewPage, setIsNewPage] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const ref = useRef();
@@ -54,6 +60,40 @@ export const DoubleLinkMenu = ({
     useEffect(() => {
         QueryBlocks(editor, searchText, result => {
             setSearchBlocks(result);
+            const items: CommonListItem[] = [];
+            if (searchBlocks?.length > 0) {
+                items.push({
+                    content: {
+                        id: 'linktopage',
+                        content: 'LINK TO PAGE',
+                    },
+                });
+                items.push(
+                    ...(searchBlocks?.map(
+                        block => ({ block } as CommonListItem)
+                    ) || [])
+                );
+            }
+
+            if (items.length > 0) {
+                items.push({ divider: 'newPage' });
+            }
+            items.push({
+                content: {
+                    id: ADD_NEW_SUB_PAGE,
+                    content: 'Add new sub-page',
+                    icon: AddIcon,
+                },
+            });
+            items.push({
+                content: {
+                    id: ADD_NEW_PAGE,
+                    content: 'Add new page in...',
+                    icon: AddIcon,
+                },
+            });
+
+            setItems(items);
         });
     }, [editor, searchText]);
 
@@ -174,6 +214,14 @@ export const DoubleLinkMenu = ({
 
     const handleSelected = async (linkBlockId: string) => {
         if (blockId) {
+            if (linkBlockId === ADD_NEW_SUB_PAGE) {
+                handleAddSubPage();
+                return;
+            }
+            if (linkBlockId === ADD_NEW_PAGE) {
+                setIsNewPage(true);
+                return;
+            }
             if (isNewPage) {
                 const newPage = await services.api.editorBlock.create({
                     workspace: editor.workspace,
@@ -256,16 +304,13 @@ export const DoubleLinkMenu = ({
                                         blockId={blockId}
                                         onSelected={handleSelected}
                                         onClose={handleClose}
-                                        searchBlocks={searchBlocks}
-                                        types={searchBlockIds}
+                                        items={items}
+                                        types={searchBlockIds.concat([
+                                            ADD_NEW_SUB_PAGE,
+                                            ADD_NEW_PAGE,
+                                        ])}
                                     />
                                 </DoubleLinkMenuWrapper>
-                                <div onClick={handleAddSubPage}>
-                                    Add new sub-page
-                                </div>
-                                <div onClick={handleAddNewPage}>
-                                    Add new page in...
-                                </div>
                             </Paper>
                         </Grow>
                     )}

@@ -10,6 +10,7 @@ import { domToRect } from '@toeverything/utils';
 import { styled } from '@toeverything/components/ui';
 
 import { QueryResult } from '../../search';
+import { PagesIcon } from '@toeverything/components/icons';
 
 export type DoubleLinkMenuContainerProps = {
     editor: Virgo;
@@ -21,6 +22,7 @@ export type DoubleLinkMenuContainerProps = {
     onClose?: () => void;
     searchBlocks?: QueryResult;
     types?: Array<string>;
+    items?: CommonListItem[];
 };
 
 export const DoubleLinkMenuContainer = ({
@@ -31,6 +33,7 @@ export const DoubleLinkMenuContainer = ({
     types,
     searchBlocks,
     style,
+    items,
 }: DoubleLinkMenuContainerProps) => {
     const menuRef = useRef<HTMLDivElement>(null);
     const [currentItem, setCurrentItem] = useState<string | undefined>();
@@ -158,11 +161,7 @@ export const DoubleLinkMenuContainer = ({
         >
             <ContentContainer>
                 <CommonList
-                    items={
-                        searchBlocks?.map(
-                            block => ({ block } as CommonListItem)
-                        ) || []
-                    }
+                    items={items}
                     onSelected={type => onSelected?.(type)}
                     currentItem={currentItem}
                     setCurrentItem={setCurrentItem}

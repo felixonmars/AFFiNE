@@ -21,7 +21,7 @@ export const commonListContainer = 'commonListContainer';
 type Content = {
     id: string;
     content: string;
-    icon: FC<SvgIconProps>;
+    icon?: FC<SvgIconProps>;
 };
 
 export type CommonListItem = {
