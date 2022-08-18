@@ -97,10 +97,11 @@ export const DoubleLinkMenu = ({
         });
     }, [editor, searchText]);
 
-    const searchBlockIds = useMemo(
-        () => Object.values(searchBlocks).map(({ id }) => id),
-        [searchBlocks]
-    );
+    const types = useMemo(() => {
+        return Object.values(searchBlocks)
+            .map(({ id }) => id)
+            .concat([ADD_NEW_SUB_PAGE, ADD_NEW_PAGE]);
+    }, [searchBlocks]);
 
     const hideMenu = useCallback(() => {
         setIsShow(false);
@@ -305,10 +306,7 @@ export const DoubleLinkMenu = ({
                                         onSelected={handleSelected}
                                         onClose={handleClose}
                                         items={items}
-                                        types={searchBlockIds.concat([
-                                            ADD_NEW_SUB_PAGE,
-                                            ADD_NEW_PAGE,
-                                        ])}
+                                        types={types}
                                     />
                                 </DoubleLinkMenuWrapper>
                             </Paper>
